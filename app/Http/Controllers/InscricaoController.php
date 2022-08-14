@@ -75,6 +75,11 @@ class InscricaoController extends Controller
         return json_encode(Inscricao::loadInscricaoById($id));
     }
 
+    public function buscaPorCpf($cpf)
+    {
+        return json_encode(Inscricao::loadInscricaoByCpf($cpf));
+    }
+
     public function destroy(Request $request, $id)
     {
         $inscricao = Inscricao::find($id);

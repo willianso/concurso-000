@@ -25,6 +25,7 @@ $router->group(
 		
 		$router->get('/inscricao', '\App\Http\Controllers\InscricaoController@index');
 		$router->get('/inscricao/{id}', '\App\Http\Controllers\InscricaoController@show');
+		$router->get('/inscricao/busca_cpf/{cpf}', '\App\Http\Controllers\InscricaoController@buscaPorCpf');
 		$router->post('/inscricao', '\App\Http\Controllers\InscricaoController@store')->name('inscricao.store');
 		$router->patch('/inscricao', '\App\Http\Controllers\InscricaoController@update');
 		$router->patch('/inscricao/{id}', '\App\Http\Controllers\InscricaoController@destroy');

@@ -1,8 +1,9 @@
 @extends('layout.layout')
 @section('content')
 <h2 class="text-center">Concurso Público para Desenvolvedor de Software</h2>
-<h4 class="text-center">Inscrição de candidato</h4>
-<el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="120px" class="demo-ruleForm">
+<h4 class="text-center" v-if="saveButton">Inscrição de candidato</h4>
+<h4 class="text-center" v-else>Comprovante de inscrição - <span :value="ruleForm.criado_em">@{{ ruleForm.criado_em }}</span></h4>
+<el-form label-position="left" :model="ruleForm" :rules="rules" ref="ruleForm" label-width="80px" class="demo-ruleForm">
     <el-form-item label="Nome" prop="nome">
         <el-input :disabled="!saveButton" v-model="ruleForm.nome"></el-input>
     </el-form-item>
@@ -45,6 +46,51 @@
                 callback();
             };
 
+            var checkCPF = (rule, value, callback) => {
+                let Soma = 0,
+                    Resto,
+                    error = 'O CPF inserido não é valido.',
+                    strCPF = value.replace(/[.-]/g, "");
+
+                if (strCPF == "00000000000") callback(new Error(error));
+
+                for (i = 1; i <= 9; i++) Soma = Soma + parseInt(strCPF.substring(i - 1, i)) * (11 - i);
+                Resto = (Soma * 10) % 11;
+
+                if ((Resto == 10) || (Resto == 11)) Resto = 0;
+                if (Resto != parseInt(strCPF.substring(9, 10))) callback(new Error(error))
+
+                Soma = 0;
+                for (i = 1; i <= 10; i++) Soma = Soma + parseInt(strCPF.substring(i - 1, i)) * (12 - i);
+                Resto = (Soma * 10) % 11;
+
+                if ((Resto == 10) || (Resto == 11)) Resto = 0;
+                if (Resto != parseInt(strCPF.substring(10, 11))) callback(new Error(error))
+
+                callback();
+            };
+
+            var buscaCPF = (rule, value, callback) => {
+                let cpf = value.replace(/[.-]/g, "")
+
+                axios.get(`/api/inscricao/busca_cpf/${cpf}`).then(resul => {
+                    if (resul.data) {
+                        this.ruleForm.estado_id = resul.data.estado_id
+                        this.getCidades()
+
+                        this.ruleForm = resul.data
+                        this.ruleForm.cargo = resul.data.inscricao.cargo
+                        this.ruleForm.criado_em = resul.data.inscricao.created_at
+                        this.ruleForm.cpf = this.ruleForm.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")
+
+                        this.exibirInscricao()
+                        this.showMessage('info', 'CPF já cadastrado', 'Imprima seu comprovante!')
+                    }
+                })
+
+                callback();
+            };
+
             return {
                 ruleForm: {
                     nome: '',
@@ -53,6 +99,7 @@
                     estado_id: '',
                     cidade_id: '',
                     cargo: '',
+                    criado_em: '',
                 },
                 estados: [],
                 cidades: [],
@@ -77,6 +124,14 @@
                             min: 14,
                             max: 14,
                             message: "Comprimento deve ser igual a 14 caracteres",
+                        },
+                        {
+                            validator: checkCPF,
+                            trigger: 'blur'
+                        },
+                        {
+                            validator: buscaCPF,
+                            trigger: 'blur'
                         }
                     ],
                     endereco: [{
@@ -93,7 +148,7 @@
                     }],
                     cargo: [{
                         required: true,
-                        message: 'Por favor, selecione um cargo',
+                        message: 'Por favor, insira um cargo',
                     }],
                 }
             };
@@ -136,6 +191,12 @@
                 });
             },
 
+            exibirInscricao() {
+                this.saveButton = false
+                this.clearFormButton = false
+                this.subscriptionButton = true
+            },
+
             showMessage(type, title, message) {
                 switch (type) {
                     case 'error':
@@ -143,7 +204,7 @@
                             title: title,
                             position: 'topRight',
                             message: message,
-                            timeout: 54000,
+                            timeout: 3000,
                         });
                         break;
                     case 'success':
@@ -151,7 +212,7 @@
                             title: title,
                             position: 'topRight',
                             message: message,
-                            timeout: 54000,
+                            timeout: 3000,
                         });
                         break;
                     default:
@@ -159,7 +220,7 @@
                             title: title,
                             position: 'topRight',
                             message: message,
-                            timeout: 54000,
+                            timeout: 3000,
                         });
                         break;
                 }
@@ -167,8 +228,11 @@
 
             printPage() {
                 let toast = document.querySelector('.iziToast');
-                iziToast.hide({}, toast);
-                
+
+                if (toast) {
+                    iziToast.hide({}, toast);
+                }
+
                 window.print();
             },
 

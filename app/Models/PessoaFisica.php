@@ -33,4 +33,10 @@ class PessoaFisica extends Model
     	return $pessoa->delete();
     }
   
+	// relacionamentos
+	// no MER é possivel ter varias inscriçoes, mas aparentemente não é o caso deste projeto, conforme doc de Requisitos
+    public function inscricao()
+    {
+        return $this->hasOne(Inscricao::class, 'pessoa_fisica_id');
+    }
 }
