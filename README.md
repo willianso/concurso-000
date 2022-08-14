@@ -6,7 +6,7 @@
 <br/>
 <span style="color: #01f;">Leia com atenção as instruções a seguir.</span>
 
-## O que se espera com o teste
+## O que se espera com o teste alou
 
 <span style="color: #01f; font-weight: bold;">
 Não precisa ser Jedi nem Super Star das 7 galáxias, nem nada do tipo

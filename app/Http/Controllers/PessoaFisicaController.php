@@ -28,12 +28,14 @@ class PessoaFisicaController extends Controller
         
 	    $pessoa = new PessoaFisica();
 	    $pessoa->nome = $request->nome;
-	    $pessoa->cpf = $request->cpf;
+	    $pessoa->cpf =  str_replace(['-','.'], '' ,$request->cpf);
 	    $pessoa->endereco = $request->endereco;
 	    $pessoa->cidade_id = $request->cidade_id;
 	    $pessoa->estado_id = $request->estado_id;
-	    
-        return json_encode(PessoaFisica::createPessoaFisica($pessoa));
+
+        PessoaFisica::createPessoaFisica($pessoa);
+
+        return json_encode($pessoa);
     }
     
     public function update(Request $request)
